@@ -18,15 +18,27 @@ struct Data
 	int numberRecordBook;	// номер зачет книжки
 	string subject;			// дисциплина
 	int markOfSubject;		// оценка за экзамен по дисциплине
-};
 
+	Data(){}
+
+	Data(int _clas, int _groupCode, string _surname, int _receiptDay, int _mount, int _year, int _numberRecordBook, string _subject, int _markOfSubject) {
+		clas = _clas;
+		groupCode = _groupCode;
+		surname = _surname;
+		receiptDay = _receiptDay;
+		mount = _mount;
+		year = _year;
+		numberRecordBook = _numberRecordBook;
+		subject = _subject;
+		markOfSubject = _markOfSubject;
+	}
+};
 
 struct Node
 {
 	Data data;				// значение элемента списка
 	Node* next;				// указатель на следующий элемент списка
 };
-
 
 struct List
 {
@@ -39,19 +51,37 @@ struct List
 	}
 };
 
+//УЗЕЛ(ВЕРШИНА) БИНАРНОГО ДЕРЕВА
+class BinaryTreeNode {
+public:
+	Data data;
+	int key;
+	BinaryTreeNode* left;
+	BinaryTreeNode* right;
+	int numberOfNodes;
+	BinaryTreeNode(const Data& _data, int _numberOfNodes) {
+		data = _data;
+		key = data.numberRecordBook;
+		numberOfNodes = _numberOfNodes;
+		left = nullptr;
+		right = nullptr;
+	}
+};
+
 //КЛАСС БИНАРНОГО ДЕРЕВА ПОИСКА
 class BinarySearchTree {
-	//УЗЕЛ(ВЕРШИНА) БИНАРНОГО ДЕРЕВА
-	class BinaryTreeNode {
-	public:
-		Data* data;
-		int key = data->numberRecordBook;
-		BinaryTreeNode* left;
-		BinaryTreeNode* right;
-		int numberOfNodes;
-	};
-
+public:
 	BinaryTreeNode* root; //корень бинарного дерева
+
+	//ФУНКЦИЯ ОПРЕДЕЛЕНИЯ РАЗМЕРА ТЕКУЩЕГО ПОДДЕРЕВА
+	int size(BinaryTreeNode* currentTreeNode) {
+		if (currentTreeNode == nullptr) {
+			return 0;
+		}
+		else {
+			return currentTreeNode->numberOfNodes;
+		}
+	}
 
 	//ФУНКЦИЯ ПОЛУЧЕНИЯ ЭЛЕМЕНТА ПО КЛЮЧУ
 	BinaryTreeNode* get(BinaryTreeNode* currentTree, int key) {
@@ -62,17 +92,56 @@ class BinarySearchTree {
 		else return currentTree;
 	}
 
-	void put(BinaryTreeNode* currentTree, int key, Data* data) {
-		if (currentTree == nullptr) return Bina
+	//ВСТАВКА ЭЛЕМЕНТА В ДЕРЕВО
+	BinaryTreeNode* put(BinaryTreeNode* currentTree, int key, const Data& data) {
+		if (currentTree == nullptr) return new BinaryTreeNode(data, 1);
+		if (key < currentTree->key) {
+			currentTree->left = put(currentTree->left, key, data);
+		}
+		else if(key > currentTree->key) {
+			currentTree->right = put(currentTree->right, key, data);
+		}
+		else {
+			currentTree->data = data;
+		}
+		currentTree->numberOfNodes = size(currentTree->left) + size(currentTree->right) + 1;
+		return currentTree;
 	}
 };
 
-BinarySearchTree* ListToTree(List list, BinarySearchTree tree) {
-	tree.root = list.first;
-	Node* currentNode = list.first;
+BinarySearchTree listToTree(Node* head) {
+	BinarySearchTree tree = BinarySearchTree();
+	tree.root = new BinaryTreeNode(head->data, 1);
+	BinaryTreeNode* currentTree = tree.root;
+
+	head = head->next;
+	while (head != nullptr) {
+		while (currentTree != nullptr) {
+			if (head->data.numberRecordBook < currentTree->key) {
+				if (currentTree->left == nullptr) {
+					currentTree->left = new BinaryTreeNode(head->data, 1);
+					currentTree = tree.root;
+					break;
+				}
+				else {
+					currentTree = currentTree->left;
+				}
+			}
+			else {
+				if (currentTree->right == nullptr) {
+					currentTree->right = new BinaryTreeNode(head->data, 1);
+					currentTree = tree.root;
+					break;
+				}
+				else {
+					currentTree = currentTree->right;
+				}
+			}
+		}
+		head = head->next;
+	}
+	return tree;
 }
-
-
 
 // ИНИЦИАЛИЗАЦИЯ списка
 List init_list()
@@ -137,6 +206,28 @@ void printLastName(List* list)
 	}
 }
 
+void insert_end(List* list, const Data& data)
+{
+	if (list->last == nullptr) // если список пустой
+	{
+		list->first = new Node(); // Создаём в списке первый узел
+		// Заполняем созданный узел полезными данными
+		list->first->data = data;
+		list->last = list->first; // Первый узел будет и последним
+		// У последнего узла нет следующего узла
+		list->last->next = nullptr;
+	}
+	else // Если список не пустой
+	{
+		Node* x = new Node(); // Создаём новый узел
+		x->data = data; // Заполняем созданный узел полезными данными
+		// Этот узел будет последним, без следующего узла
+		x->next = nullptr;
+		// Новый узел будет добавлен после последнего
+		list->last->next = x;
+		list->last = x; // Делаем созданный узел последним
+	}
+}
 
 // ОЧИСТКА --------------------------------------------------------
 void clear(List* list) {
@@ -181,6 +272,20 @@ int main() {
 		}
 		loadData.close();
 	}
+
+	print(&my_list);
+
+	//ТЕСТОВОЕ ПРЕОБРАЗОВАНИЕ ИЗ СВЯЗНОГО СПИСКА В ДЕРЕВО ПОИСКА. РАБОТАЕТ!!!
+	BinarySearchTree test = listToTree(my_list.first);
+	
+	//ТЕСТОВАЯ ВСТАВКА ЭЛЕМЕНТА В ДЕРЕВО. РАБОТАЕТ!!!
+	Data testData = Data(2, 121, "Makarov", 30, 11, 2022, 203, "Android", 5);
+	test.put(test.root, 203, testData);
+
+	//ТЕСТОВОЕ ПОЛУЧЕНИЕ ЭЛЕМЕНТА ИЗ ДЕРЕВА. РАБОТАЕТ!!!
+	cout << test.get(test.root, 145)->key << endl;
+
+	int lol = 1; //затычка для точки остановы
 
 	return 0;
 }
