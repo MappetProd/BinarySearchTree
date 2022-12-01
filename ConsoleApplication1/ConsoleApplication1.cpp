@@ -109,6 +109,11 @@ public:
 	}
 };
 
+//Эльмир хороший человек
+void function() {
+	int a = 1;
+}
+
 BinarySearchTree listToTree(Node* head) {
 	BinarySearchTree tree = BinarySearchTree();
 	tree.root = new BinaryTreeNode(head->data, 1);
