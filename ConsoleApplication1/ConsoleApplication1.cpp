@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <Windows.h>
 #include <string>
 #include <iomanip>
 #include <locale.h>
@@ -242,8 +241,6 @@ void clear(List* list) {
 } //O(n)
 
 int main() {
-	SetConsoleCP(1251);				// Рускоязычный вывод в консоль
-	SetConsoleOutputCP(1251);
 
 	int clas;				// курс
 	int groupCode;			// код группы
