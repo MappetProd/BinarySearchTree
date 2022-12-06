@@ -34,7 +34,6 @@ struct List
 };
 
 
-
 List init_list()
 {
 		List list;			
@@ -105,19 +104,9 @@ void print(List *list) {
 
 struct BinaryTreeNode{
 		Data data;
-		int key;
 		BinaryTreeNode* left;
 		BinaryTreeNode* right;
-		int numberOfNodes;
 };
-
-
-BinaryTreeNode* get(BinaryTreeNode* currentTree, int key) {
-		if (currentTree == nullptr) return nullptr;
-		if (key < currentTree->key) return get(currentTree->left, key);
-		else if (key > currentTree->key) return get(currentTree->right, key);
-		else return currentTree;
-}
 
 
 void addOne(BinaryTreeNode* &tree, Data newData) {
@@ -148,16 +137,21 @@ void listToTree(BinaryTreeNode* tree, Node* head){
 }
 
 
-void dump3(BinaryTreeNode * root, int space = 0) {
-   if (!root)
-      return;
-   enum { COUNT = 2 };
-   space += COUNT;
-   dump3(root->right, space);
-   for (int i = COUNT; i < space; ++i)
-      cout << "  ";
-   cout << root->data.numberRecordBook << endl;
-   dump3(root->left, space);
+void printTree(BinaryTreeNode * root, int space = 0) {
+   	if (root == nullptr){
+		 		for (int i = 0; i < space; i++){
+						cout<<"  ";
+				}
+				cout<<"--"<<endl;
+      	return;
+		}
+   	space += 2;
+   	printTree(root->right, space);
+  	for (int i = 2; i < space; ++i)
+    		cout << "  ";
+
+  	cout << root->data.numberRecordBook << endl;
+  	printTree(root->left, space);
 }
 
 
@@ -173,88 +167,51 @@ BinaryTreeNode* Find(BinaryTreeNode * root, int key)
 }
 
 
-BinaryTreeNode* FindParent(BinaryTreeNode * root, int key)
-{
-		while (root != nullptr)
-		{
-				if (root->right->data.numberRecordBook == key ||  root->left->data.numberRecordBook == key) return root;
-				else if (key >= root->data.numberRecordBook) root = root->right;
-				else root = root->left; // Не больше и не меньше - значит равно
-		}
-		return nullptr; // Не найдено
-}
+void remove(BinaryTreeNode*& root, int key){
+		BinaryTreeNode* curr = root;
+  	BinaryTreeNode* parent = nullptr;
 
-
-void Remove(BinaryTreeNode * &root, BinaryTreeNode *current)
-{		
-		if (root->data.numberRecordBook == current->data.numberRecordBook){
-						
-				if (root == nullptr) return;
-				else if (root->left == nullptr){
-						delete root;
-						root = root->right;
-						return;
-				} else if (root->right == nullptr){
-						delete root;
-						root = root->left;
-						return;
-				} else {
-						BinaryTreeNode* child = current->left;
-						while (child->right != nullptr)
-						child = child->right;
-						Data vl = child->data;
-						Remove(root, child);
-						root->data = vl;
-						return;
-				}
-		}
-
-		BinaryTreeNode *parent = FindParent(root, current->data.numberRecordBook);
-		if (current == nullptr)
-		return;
-		
-		if (current->left == nullptr) // Нет левого ребёнка
+		while (curr && curr->data.numberRecordBook != key)
 		{
-				// Заменяем удаляемый элемент на правого ребёнка
-				if (parent->data.numberRecordBook >= current->data.numberRecordBook ){
-						parent->left = current->right;
-				} else {
-						parent->right = current->right;
-				}
-				delete current;
+			parent = curr;
+			if (curr->data.numberRecordBook > key)
+				curr = curr->left;
+			else
+				curr = curr->right;
 		}
-		else if (current->right == nullptr) // Нет правого ребёнка
+		if (curr == nullptr)
+			return;
+		if (curr->left == nullptr)
 		{
-				// Заменяем удаляемый элемент на левого ребёнка
-				if (parent->data.numberRecordBook >= current->data.numberRecordBook ){
-						parent->left = current->left;
-				} else {
-						parent->right = current->left;
-				}
-				delete current;
+			if (parent && parent->left == curr)
+				parent->left = curr->right;
+			if (parent && parent->right == curr)
+				parent->right = curr->right;
+			delete curr;
+			return;
 		}
-		else // Удаляем узел с обеими детьми
-		{		
-				// Ищем самый правый элемент левого поддерева
-				BinaryTreeNode* child = current->left;
-				while (child->right != nullptr)
-				child = child->right;
-				Data vl = child->data;
-				// Заменяем удаляемый элемент на найденный
-				if (parent->data.numberRecordBook >= current->data.numberRecordBook ){
-						Remove(root, child); //сначала удаляем этот элемент, только потом меняем значения
-						parent->left->data = vl;
-				} else {
-						Remove(root, child);
-						parent->right->data = vl;
-				}	
+		if (curr->right == nullptr)
+		{
+
+			if (parent && parent->left == curr)
+				parent->left = curr->left;
+			if (parent && parent->right == curr)
+				parent->right = curr->left;
+			delete curr;
+			return;
 		}
+		BinaryTreeNode* child = curr->right;
+  	while (child->left)
+    	child = child->left;
+		Data child_value = child->data;
+		remove(root, child_value.numberRecordBook);
+		curr->data = child_value;
 }
 
 
 void postorderPrint(BinaryTreeNode *root)
 {
-    if (root == NULL)   // Базовый случай
+    if (root == nullptr)   // Базовый случай
     {
        return;
     }
@@ -293,16 +250,13 @@ int main() {
 		loadData.close();
 	}
 
-	// cout << "Фамилии:\n";
-	// print(&my_list);
-	// cout << '\n' << endl;
 
 	Data test3 = {2, 121, "Iskhakov", 23, 9, 2021, 1, "Math", 5};
-	Data test4 = {2, 121, "Iskhakov", 23, 9, 2021, 10, "Math", 5};
-	Data test5 = {2, 121, "Iskhakov", 23, 9, 2021, 20, "Math", 5};
-	Data test6 = {2, 121, "Iskhakov", 23, 9, 2021, 141, "Math", 5};
-	Data test7 = {2, 121, "Iskhakov", 23, 9, 2021, 9, "Math", 5};
-	Data test8 = {2, 121, "Iskhakov", 23, 9, 2021, 11, "Math", 5};
+	Data test4 = {2, 121, "Petrov", 23, 9, 2021, 10, "Math", 5};
+	Data test5 = {2, 121, "Zverev", 23, 9, 2021, 20, "Math", 5};
+	Data test6 = {2, 121, "Wild", 23, 9, 2021, 141, "Math", 5};
+	Data test7 = {2, 121, "Smith", 23, 9, 2021, 9, "Math", 5};
+	Data test8 = {2, 121, "Pavlov", 23, 9, 2021, 11, "Math", 5};
 
 	BinaryTreeNode *tree = nullptr;
 
@@ -310,28 +264,39 @@ int main() {
 	addOne(tree, my_list.first->data);	
 	listToTree(tree, my_list.first->next);
 
-	//вывод дерева
-	dump3(tree);
 	cout << '\n' << endl;
 	cout << '\n' << endl;
 
+	cout << "-----Исходное дерево------" << endl;
+	//вывод дерева
+	printTree(tree);
+	cout << '\n' << endl;
+	cout << '\n' << endl;
+
+	cout << "-----Добавление новых узлов------" << endl;
 	//добавление новых
 	addOne(tree, test3);
 	addOne(tree, test4);
 	addOne(tree, test5);
 	addOne(tree, test6);
 	addOne(tree, test7);
-	// addOne(tree, test8);
 
-	dump3(tree);	
+	printTree(tree);	
 	cout << '\n' << endl;
 	cout << '\n' << endl;
 
-	Remove(tree, Find(tree, 145));
-	
-	dump3(tree);		
+	cout << "-----Удаление узла с ключом 10------" << endl;
+	remove(tree, 140);
+	printTree(tree);
 
+	cout << "-----Поиск узла по ключу------" << endl;
+	cout << Find(tree, 20)->data.surname<< endl;
 
+	cout << '\n' << endl;
+	cout << '\n' << endl;		
+	cout << "-----Обход в глубину------" << endl;
 	postorderPrint(tree);
+	cout << '\n' << endl;
+	cout << '\n' << endl;
 	return 0;
 }
