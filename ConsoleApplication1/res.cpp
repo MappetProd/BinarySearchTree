@@ -107,7 +107,7 @@ struct BinaryTreeNode{
 		BinaryTreeNode* left;
 		BinaryTreeNode* right;
 		~BinaryTreeNode(){
-			cout<<"Очистка"<<endl;
+			cout<<"Удаление узла"<<endl;
 		};
 };
 
@@ -117,7 +117,7 @@ void Delete_BinaryTree(BinaryTreeNode *&Node) {
     Delete_BinaryTree(Node->left);
     Delete_BinaryTree(Node->right);
     delete(Node);
-    Node = nullptr;
+    return;
   }
 }
 
