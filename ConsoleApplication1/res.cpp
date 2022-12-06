@@ -106,7 +106,20 @@ struct BinaryTreeNode{
 		Data data;
 		BinaryTreeNode* left;
 		BinaryTreeNode* right;
+		~BinaryTreeNode(){
+			cout<<"Очистка"<<endl;
+		};
 };
+
+
+void Delete_BinaryTree(BinaryTreeNode *&Node) {
+  if (Node != nullptr) {
+    Delete_BinaryTree(Node->left);
+    Delete_BinaryTree(Node->right);
+    delete(Node);
+    Node = nullptr;
+  }
+}
 
 
 void addOne(BinaryTreeNode* &tree, Data newData) {
@@ -298,5 +311,7 @@ int main() {
 	postorderPrint(tree);
 	cout << '\n' << endl;
 	cout << '\n' << endl;
+
+	Delete_BinaryTree(tree);
 	return 0;
 }
